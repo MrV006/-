@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود / ثبت‌نام | مانگاتا</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 id="auth-title">ورود به حساب</h1>
+            <p id="auth-subtitle">برای ادامه وارد شوید</p>
+
+            <div id="alert-box" class="alert"></div>
+
+            <form id="auth-form">
+                <div class="input-group">
+                    <label for="username">نام کاربری</label>
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="مثال: amir123">
+                </div>
+                <div class="input-group">
+                    <label for="password">رمز عبور</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="حداقل ۶ کاراکتر">
+                </div>
+                <button type="submit" id="submit-btn" class="btn">ورود</button>
+            </form>
+
+            <div class="auth-switch">
+                <span id="switch-text">حساب کاربری ندارید؟</span>
+                <a href="#" id="switch-link">ثبت‌نام کنید</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript placed at the end for performance -->
+    <script src="/assets/js/auth.js"></script>
+</body>
+</html>

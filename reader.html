@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مطالعه امن فصل | مانگاتا</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .reader-layout { max-width: 800px; margin: 0 auto; min-height: 100vh; position: relative; background: #000; }
+        .reader-controls { position: sticky; top: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); z-index: 10; }
+        
+        #manga-canvas { width: 100%; display: block; object-fit: contain; pointer-events: none; user-select: none; }
+        
+        .loading-overlay { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); color: white; display: none; }
+        
+        .nav-btns { display: flex; gap: 0.5rem; }
+    </style>
+</head>
+<body style="background: #000;">
+    <div class="reader-layout">
+        <div class="reader-controls">
+            <button class="btn" style="width: auto; background: var(--bg-surface); color: white;" onclick="window.history.back()">بازگشت</button>
+            <div style="font-weight: 500; font-size: 0.875rem;">صفحه <span id="current-page">۱</span></div>
+            <div class="nav-btns">
+                <button class="btn" id="prev-btn" onclick="changePage(-1)">قبلی</button>
+                <button class="btn" id="next-btn" onclick="changePage(1)">بعدی</button>
+            </div>
+        </div>
+
+        <div style="position: relative; min-height: 500px;">
+            <div id="loader" class="loading-overlay">در حال پردازش امن تصویر...</div>
+            <img id="manga-canvas" src="" alt="Manga Page">
+        </div>
+    </div>
+
+    <script>
+        // Kill typical steal techniques natively
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('dragstart', e => e.preventDefault());
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const chapterId = urlParams.get('chapter') || 1;
+        let currentPage = 1;
+        let originalBlobUrl = null;
+
+        async function loadPage(pageNum) {
+            const loader = document.getElementById('loader');
+            const imgCanvas = document.getElementById('manga-canvas');
+            
+            loader.style.display = 'flex';
+            imgCanvas.style.opacity = 0;
+
+            try {
+                // Fetch authenticated stream preventing any kind of caching
+                const response = await fetch(`/api/mangas/read.php?chapter_id=${chapterId}&page=${pageNum}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error('You do not have access to this page, or page limit reached!');
+
+                // Free memory if there was a previous blob URL active
+                if (originalBlobUrl) {
+                    URL.revokeObjectURL(originalBlobUrl);
+                }
+
+                // Process strictly as BLOB in RAM (not written to temp storage natively)
+                const imageBlob = await response.blob();
+                originalBlobUrl = URL.createObjectURL(imageBlob);
+                
+                imgCanvas.src = originalBlobUrl;
+                document.getElementById('current-page').textContent = pageNum;
+                currentPage = pageNum;
+                
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                imgCanvas.onload = () => {
+                    loader.style.display = 'none';
+                    imgCanvas.style.opacity = 1;
+                };
+            }
+        }
+
+        function changePage(direction) {
+            if (currentPage + direction > 0) {
+                loadPage(currentPage + direction);
+            }
+        }
+
+        // Initialize Engine
+        window.addEventListener('DOMContentLoaded', () => loadPage(1));
+    </script>
+</body>
+</html>

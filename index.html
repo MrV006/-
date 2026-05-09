@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مانگاتا | Mangata</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192x192.png">
+</head>
+<body>
+    <!-- اطلاعیه اجباری بروزرسانی سیستم -->
+    <div id="system-update-banner" class="global-alert" style="display: none;">
+        <div class="global-alert-content">
+            <strong>نسخه جدید مانگاتا رسید!</strong>
+            <p>لطفاً برای بهبود سرعت و دریافت امکانات جدید، صفحه را رفرش کنید.</p>
+            <button class="btn btn-sm" style="width:auto;" onclick="hideUpdateBanner()">متوجه شدم</button>
+        </div>
+    </div>
+
+    <!-- هدر متحرک و واکنش‌گرا -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="header-right">
+                <h1 class="brand-logo">مانـگاتا</h1>
+                <nav class="desktop-nav">
+                    <a href="#">دسته‌ها</a>
+                    <a href="#">ژانرها</a>
+                    <a href="#">وبلاگ</a>
+                    <a href="#">تماس با ما</a>
+                </nav>
+            </div>
+            <div class="header-left">
+                <div class="search-box header-search">
+                    <input type="text" id="main-search" placeholder="جستجو...">
+                    <button class="search-btn">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </button>
+                </div>
+                
+                <button class="icon-btn" aria-label="پیام‌ها/اعلان‌ها">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span class="notification-badge"></span>
+                </button>
+                
+                <a href="/login.html" class="icon-btn" aria-label="پروفایل">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
+                
+                <button class="menu-btn mobile-only">
+                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- بخش استوری‌ها (شبیه اینستاگرام) -->
+    <section class="stories-container">
+        <div class="stories-scroll" id="stories-list">
+            <!-- Data will be loaded from DB -->
+        </div>
+    </section>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="hero-tag">...</span>
+            <h2>در حال بارگذاری...</h2>
+            <p>لطفا کمی صبر کنید</p>
+            <div class="hero-actions">
+                <a href="#" class="btn btn-hero">...</a>
+                <a href="#" class="btn btn-outline-hero">...</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- محتوای اصلی -->
+    <main class="main-container" style="padding: 0;">
+    
+        <section class="home-section">
+            <div class="section-container">
+                <div class="section-title">
+                    <h2>کارهایی که در سایت هستند (کارهای جدید)</h2>
+                    <a href="/shop.html" class="view-all">مشاهده همه &larr;</a>
+                </div>
+                
+                <div class="scroll-container" id="latest-mangas">
+                    <!-- Data will be loaded from database -->
+                </div>
+            </div>
+        </section>
+
+        <section class="home-section">
+            <div class="section-container">
+                <div class="grid-layout">
+                    <div class="grid-col">
+                        <div class="section-title"><h2>تخفیفات</h2></div>
+                        <div class="list-container" id="discounts-list">
+                            <!-- Data will be loaded from DB -->
+                        </div>
+                    </div>
+                    <div class="grid-col">
+                        <div class="section-title"><h2>وبلاگ یا اخبار</h2></div>
+                        <div class="list-container" id="news-list">
+                            <!-- Data will be loaded from DB -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- کارهای پیشنهادی -->
+        <section class="home-section">
+            <div class="section-container">
+                <div class="section-title"><h2>کارهای پیشنهادی</h2></div>
+                <div class="scroll-container" id="recommended-mangas">
+                    <!-- Data will be loaded from database -->
+                </div>
+            </div>
+        </section>
+
+        <!-- بهترین کارها -->
+        <section class="home-section">
+            <div class="section-container">
+                <div class="section-title"><h2>بهترین کارها</h2></div>
+                <div class="scroll-container" id="popular-mangas">
+                    <!-- Data will be loaded from database -->
+                </div>
+            </div>
+        </section>
+
+        <!-- بهترین‌های ماه -->
+        <section class="home-section">
+            <div class="section-container">
+                <div class="section-title"><h2>بهترین‌های ماه (مترجم، ادیتور، در سیستم‌ها)</h2></div>
+                <div class="team-grid" id="team-list">
+                    <!-- Data will be loaded from DB -->
+                </div>
+            </div>
+        </section>
+
+        <!-- تگ‌ها -->
+        <section class="home-section">
+            <div class="section-container">
+                <div class="section-title"><h2>تگ‌ها</h2></div>
+                <div class="tags-container">
+                    <a href="#" class="tag">اکشن</a>
+                    <a href="#" class="tag">فانتزی</a>
+                    <a href="#" class="tag">عاشقانه</a>
+                    <a href="#" class="tag">تناسخ</a>
+                    <a href="#" class="tag">کمدی</a>
+                    <a href="#" class="tag">شونن</a>
+                    <a href="#" class="tag">ترسناک</a>
+                    <a href="#" class="tag">درام</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- استخدام -->
+        <section class="home-section" style="padding-bottom: 4rem;">
+            <div class="section-container">
+                <div class="cta-banner">
+                    <div class="cta-content">
+                        <h2>فرم عضویت برای تیم</h2>
+                        <p>ما در مانگاتا همواره به دنبال استعدادهای جدید در زمینه ترجمه، ادیت و کلین هستیم. به جمع ما بپیوندید!</p>
+                        <button class="btn" style="width: auto;" onclick="openRecruitmentModal()">تکمیل فرم درخواست</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- فوتر سایت -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h2 class="brand-logo" style="margin-bottom: 1rem;">مانـگاتا</h2>
+                <p>بزرگترین مرجع تخصصی خواندن مانهوا و مانگا به زبان فارسی.</p>
+                <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                    <!-- شبکه‌های اجتماعی -->
+                    <a href="#" style="color:var(--text-secondary);"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></a>
+                    <a href="#" style="color:var(--text-secondary);"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+                    <a href="#" style="color:var(--text-secondary);"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2-2.4-3.5-4.4-3.5h-1.2c-.7-3-3.2-5.2-6.2-5.6-3-.3-5.9 1.3-7.3 4-1.2 2.5-1 5.4.5 7.6M2 22l4-11 5 11M16 22l4-11-5 11"></path></svg></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href="#">قوانین و مقررات</a>
+                <a href="#">حریم خصوصی</a>
+                <a href="#">درباره ما</a>
+                <a href="#">تماس با ما</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 مانگاتا. تمامی حقوق محفوظ است.</p>
+        </div>
+    </footer>
+
+    <!-- مودال جذب نیرو (استخدام) -->
+    <div id="recruitment-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeRecruitmentModal()">&times;</button>
+            <h2 style="margin-bottom:1rem;">درخواست عضویت در تیم سازندگان</h2>
+            <p class="modal-desc">ما در مانگاتا به دنبال مترجمین، ادیتورها و کلینرهای خلاق هستیم!</p>
+            
+            <form id="recruitment-form">
+                <div class="input-group">
+                    <label>تخصص مورد نظر (مترجم / ادیتور / کلینر)</label>
+                    <select id="recruitment-role" required style="width: 100%; padding: 0.75rem; background: var(--bg-primary); border: 1px solid var(--border-color); color: white; border-radius: var(--radius-md);">
+                        <option value="translator">مترجم</option>
+                        <option value="editor">ادیتور (تایپیستر)</option>
+                        <option value="cleaner">کلینر</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>آیدی ارتباطی (تلگرام / روبیکا / بله)</label>
+                    <input type="text" id="recruitment-contact" required placeholder="@YourID">
+                </div>
+                
+                <div class="input-group">
+                    <label>توضیحات کوتاه درباره خودتان</label>
+                    <textarea id="recruitment-desc" rows="3" style="width: 100%; padding: 0.75rem; background: var(--bg-primary); border: 1px solid var(--border-color); color: white; border-radius: var(--radius-md);" placeholder="چرا دوست دارید در مانگاتا فعالیت کنید؟"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>دانلود فایل تست (الزامی)</label>
+                    <a href="/downloads/test-file.zip" class="btn btn-outline" style="text-align: center; display: block; margin-bottom: 0.5rem; text-decoration: none;">⬇ دانلود فایل تست</a>
+                </div>
+
+                <div class="input-group">
+                    <label>آپلود فایل نتیجه (پس از انجام تست)</label>
+                    <input type="file" id="recruitment-result" required style="width: 100%; padding: 0.5rem;">
+                </div>
+
+                <button type="submit" class="btn" style="margin-top: 1rem;">ارسال درخواست</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نمایش استوری (Full Screen) -->
+    <div id="story-viewer" class="story-viewer" style="display: none;">
+        <div class="story-progress-bar">
+            <div class="progress-fill" id="story-progress"></div>
+        </div>
+        <button class="story-close" onclick="closeStoryViewer()">&times;</button>
+        <div class="story-content" id="story-content-area">
+            <!-- محتوای استوری (ویدیو یا عکس) اینجا لود می‌شود -->
+        </div>
+    </div>
+
+    <script src="/assets/js/main.js"></script>
+</body>
+</html>
+

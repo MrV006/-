@@ -1,0 +1,24 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Total Lockdown of System Configs and Logs
+    RewriteRule ^logs/.* - [F,L]
+    RewriteRule \.sql$ - [F,L]
+    RewriteRule \.env.*$ - [F,L]
+    
+    # 2. Block Direct Execution inside Uploads
+    # Even if an attacker uploads a PHP shell as a .jpg physically (via bugs elsewhere), it won't execute.
+    RewriteRule ^uploads/.*\.php$ - [F,L]
+    
+    # 3. Block Direct File Read to the chapters folder! 
+    # Forcing all traffic to route through `api/mangas/read.php` which validates session logic.
+    RewriteRule ^uploads/chapters/.* - [F,L]
+    
+    # Enable authorization logic over FastCGI / FPM if required by host
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+    
+    # Standard production Headers (Defense in depth)
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "DENY"
+</IfModule>

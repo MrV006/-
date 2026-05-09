@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مشاهده مانهوا | مانگاتا</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .manga-detail-header {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .manga-cover-large {
+            width: 250px;
+            aspect-ratio: 2/3;
+            border-radius: var(--radius-lg);
+            background: var(--bg-surface);
+            object-fit: cover;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-lg);
+        }
+        .manga-info-content {
+            flex: 1;
+            min-width: 300px;
+        }
+        .manga-info-content h1 {
+            font-size: 2rem;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+        .manga-meta-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .tag {
+            background: var(--bg-surface-hover);
+            color: var(--text-secondary);
+            padding: 0.2rem 0.6rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+        }
+        .manga-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .chapters-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 3rem;
+        }
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .chapter-item:hover {
+            transform: scale(1.01);
+            border-color: var(--accent-color);
+        }
+        .price-badge {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .unlocked-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        /* Comments Section */
+        .comments-section {
+            background: var(--bg-surface);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+        }
+        .comment-post {
+            margin-bottom: 2rem;
+        }
+        .comment-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            resize: vertical;
+            min-height: 100px;
+            outline: none;
+            margin-bottom: 0.5rem;
+        }
+        .comment-input:focus {
+            border-color: var(--accent-color);
+        }
+        .comment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .comment-item {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .comment-meta strong {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        .comment-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .admin-badge {
+            color: var(--accent-color);
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+        @media (max-width: 600px) {
+            .manga-cover-large {
+                width: 100%;
+                max-width: 300px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <h1 class="brand-logo"><a href="/" style="color:inherit; text-decoration:none;">مانـگاتا</a></h1>
+            <div class="header-actions">
+                <a href="/dashboard.html" class="btn btn-outline btn-sm">کیف پول / داشبورد</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="alert" id="alert-box" style="margin: 1rem auto; max-width: 1200px;"></div>
+
+    <main class="main-container">
+        <!-- Manga Info -->
+        <div class="manga-detail-header" id="manga-header">
+            <!-- Populated via JS -->
+            <div style="color:var(--text-secondary);">در حال بارگذاری اطلاعات...</div>
+        </div>
+
+        <div class="section-title">
+            <h2>فصل‌ها</h2>
+        </div>
+        <!-- Chapters List -->
+        <div class="chapters-list" id="chapters-list">
+            <!-- Populated via JS -->
+            <div style="color:var(--text-secondary);">در حال بررسی دسترسی‌ها...</div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="section-title">
+            <h2>نظرات خوانندگان</h2>
+        </div>
+        <div class="comments-section">
+            <div class="comment-post">
+                <textarea class="comment-input" id="comment-input" placeholder="نظر خود را درباره این مانهوا بنویسید... (حداکثر 1000 کاراکتر)"></textarea>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.8rem; color:var(--text-muted);">برای ثبت نظر باید وارد حساب کاربری شوید.</span>
+                    <button class="btn" style="width:auto;" onclick="submitComment()">ثبت نظر</button>
+                </div>
+            </div>
+            
+            <div class="comment-list" id="comment-list">
+                <div style="color:var(--text-secondary);">در حال بارگذاری نظرات...</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const mangaId = urlParams.get('id');
+
+        const alertBox = document.getElementById('alert-box');
+        function showAlert(msg, type) {
+            alertBox.textContent = msg;
+            alertBox.className = `alert ${type}`;
+            alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!mangaId) {
+                showAlert('مانهوا یافت نشد!', 'error');
+                return;
+            }
+            loadMangaData();
+            loadComments();
+        });
+
+        async function loadMangaData() {
+            try {
+                // Here we would normally hit an API like /api/manhwa/detail.php?id=X
+                // Since this is a UI prototype with some backend logic connected, we will mock the details
+                // but if there were real chapters we'd fetch them here.
+                
+                // MOCK DATA for Manga Headers
+                const mangaHeader = document.getElementById('manga-header');
+                mangaHeader.innerHTML = `
+                    <div class="manga-cover-large" style="background: linear-gradient(45deg, #1e293b, #3b82f6);"></div>
+                    <div class="manga-info-content">
+                        <h1>عنوان مانهوا (نمایشی)</h1>
+                        <div class="manga-meta-tags">
+                            <span class="tag">اکشن</span>
+                            <span class="tag">فانتزی</span>
+                            <span class="tag">شبیه‌ساز</span>
+                        </div>
+                        <p class="manga-description">این یک متن نمایشی برای توضیحات مانهوا است. داستان از اینجا شروع می‌شود که قهرمان ما متوجه قدرت‌های پنهان خود می‌شود و سفری پرماجرا را آغاز می‌کند...</p>
+                    </div>
+                `;
+
+                // MOCK DATA for Chapters List
+                const chaptersList = document.getElementById('chapters-list');
+                chaptersList.innerHTML = `
+                    <div class="chapter-item" onclick="readChapter(1, true)">
+                        <div>
+                            <strong>فصل 1</strong>
+                            <span style="display:block; font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">رایگان</span>
+                        </div>
+                        <span class="unlocked-badge">باز شده</span>
+                    </div>
+                    <div class="chapter-item" onclick="purchaseChapter(2)">
+                        <div>
+                            <strong>فصل 2</strong>
+                            <span style="display:block; font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">قیمت: ۵,۰۰۰ تومان</span>
+                        </div>
+                        <span class="price-badge">خرید</span>
+                    </div>
+                `;
+            } catch (err) {
+                showAlert('خطا در بارگذاری اطلاعات.', 'error');
+            }
+        }
+
+        function readChapter(chapId, isUnlocked) {
+            if (isUnlocked) {
+                window.location.href = `/reader.html?chapter=${chapId}`;
+            } else {
+                showAlert('برای خواندن این فصل ابتدا باید آن را خریداری کنید.', 'error');
+            }
+        }
+
+        async function purchaseChapter(chapId) {
+            if (!confirm('آیا از کیف پول شما برای خرید این فصل کسر شود؟')) return;
+            
+            try {
+                const res = await fetch('/api/shop/purchase.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chapter_id: chapId })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    showAlert('فصل با موفقیت خریداری شد!', 'success');
+                    setTimeout(() => window.location.href = `/reader.html?chapter=${chapId}`, 1500);
+                } else {
+                    showAlert(data.error || 'لطفا وارد حساب شوید یا موجودی خود را افزایش دهید.', 'error');
+                }
+            } catch (err) {
+                showAlert('خطا در انجام خرید.', 'error');
+            }
+        }
+
+        async function loadComments() {
+            const list = document.getElementById('comment-list');
+            try {
+                const res = await fetch(`/api/comments/list.php?manga_id=${mangaId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (!data.comments || data.comments.length === 0) {
+                        list.innerHTML = '<p style="color:var(--text-muted); text-align:center;">اولین نفری باشید که نظر می‌دهد!</p>';
+                        return;
+                    }
+
+                    list.innerHTML = data.comments.map(c => `
+                        <div class="comment-item">
+                            <div class="comment-meta">
+                                <div>
+                                    <strong>${c.username}</strong>
+                                    ${c.role !== 'user' ? '<span class="admin-badge">(ادمین تیم)</span>' : ''}
+                                </div>
+                                <span>${c.created_at}</span>
+                            </div>
+                            <div class="comment-text">${c.content}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                list.innerHTML = '<p style="color:var(--error-color);">خطا در بارگذاری نظرات.</p>';
+            }
+        }
+
+        async function submitComment() {
+            const content = document.getElementById('comment-input').value;
+            if (!content.trim()) {
+                showAlert('لطفا متن نظر را بنویسید.', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/comments/post.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ manga_id: mangaId, content: content })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    showAlert('نظر شما با موفقیت ثبت شد!', 'success');
+                    document.getElementById('comment-input').value = '';
+                    loadComments();
+                } else {
+                    showAlert(data.error || 'برای ثبت نظر وارد حساب شوید.', 'error');
+                }
+            } catch (err) {
+                showAlert('خطا در ثبت نظر.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
