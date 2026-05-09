@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>داشبورد کاربری | مانگاتا</title>
+    <title>پروفایل کاربری | مانگاتا</title>
     <link rel="stylesheet" href="/assets/css/style.css">
     <style>
         .user-layout { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
@@ -41,7 +41,9 @@
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('library')">کتابخانه من</button>
-            <button class="tab-btn" onclick="switchTab('receipt')">شارژ کیف پول (فیش)</button>
+            <button class="tab-btn" onclick="switchTab('receipt')">شارژ کیف پول</button>
+            <button class="tab-btn" onclick="switchTab('notifications')">نوتیفیکیشن‌ها</button>
+            <button class="tab-btn" onclick="switchTab('earnings')" id="tab-btn-earnings" style="display:none;">درآمد من (همکار)</button>
             <a href="/shop.html" class="tab-btn" style="text-decoration: none; display: flex; align-items: center;">رفتن به فروشگاه &rarr;</a>
         </div>
 
@@ -54,6 +56,7 @@
 
         <!-- Receipt Section -->
         <div id="tab-receipt" style="display: none;">
+            <!-- content remains same -->
             <div class="grid-layout">
                 <div class="card">
                     <h3 style="margin-bottom: 0.5rem;">ارسال فیش جدید</h3>
@@ -68,7 +71,10 @@
                             <label>تصویر فیش (رسید واریز)</label>
                             <input type="file" id="receipt_image" accept=".jpg, .jpeg, .png, .webp" required style="padding: 0.5rem; background: var(--bg-primary);">
                         </div>
-                        <button type="submit" class="btn">ارسال فیش برای بررسی</button>
+                        <div style="display:flex; gap:1rem;">
+                            <button type="submit" class="btn" style="flex:1;">ارسال فیش برای بررسی</button>
+                            <button type="button" class="btn" id="online-pay-btn" style="display:none; background:var(--accent-color); flex:1;" onclick="startOnlinePayment()">پرداخت آنلاین (زرین پال)</button>
+                        </div>
                     </form>
                 </div>
                 
@@ -78,8 +84,34 @@
                 </div>
             </div>
         </div>
+
+        <!-- Notifications Section -->
+        <div id="tab-notifications" style="display: none;">
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">اعلان‌های من</h3>
+                <div id="notifications-container">
+                    <p style="color:var(--text-muted);">در حال بارگذاری...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings Section -->
+        <div id="tab-earnings" style="display: none;">
+            <div class="grid-layout">
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">خلاصه درآمد</h3>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-color);" id="total-earnings">0 <span style="font-size: 1rem; color: var(--text-muted);">تومان</span></div>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">پاداش هدیه چپتر: <strong id="total-gift-chapters">0</strong> چپتر</p>
+                </div>
+                <div class="card" style="grid-column: 1/-1;">
+                    <h3 style="margin-bottom: 1.5rem;">جزئیات کارهای انجام شده</h3>
+                    <div id="earnings-history"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="/assets/js/layout.js"></script>
     <script src="/assets/js/dashboard.js"></script>
 </body>
 </html>

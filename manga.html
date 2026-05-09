@@ -240,8 +240,23 @@
                             <span class="tag">شبیه‌ساز</span>
                         </div>
                         <p class="manga-description">این یک متن نمایشی برای توضیحات مانهوا است. داستان از اینجا شروع می‌شود که قهرمان ما متوجه قدرت‌های پنهان خود می‌شود و سفری پرماجرا را آغاز می‌کند...</p>
+                        <button class="btn btn-sm" id="bookmark-btn" onclick="toggleBookmark()" style="width:auto; margin-bottom:1rem; border:1px solid var(--accent-color); background:transparent; color:var(--accent-color);">نشان کردن</button>
                     </div>
                 `;
+
+                // check bookmark status silently
+                try {
+                    const bmRes = await fetch(`/api/manhwa/bookmark_status.php?id=${mangaId}`);
+                    if(bmRes.ok) {
+                        const bData = await bmRes.json();
+                        if(bData.is_bookmarked) {
+                            const btn = document.getElementById('bookmark-btn');
+                            btn.textContent = 'نشان شده ✓';
+                            btn.style.background = 'var(--accent-color)';
+                            btn.style.color = 'white';
+                        }
+                    }
+                } catch(e){}
 
                 // MOCK DATA for Chapters List
                 const chaptersList = document.getElementById('chapters-list');
@@ -263,6 +278,36 @@
                 `;
             } catch (err) {
                 showAlert('خطا در بارگذاری اطلاعات.', 'error');
+            }
+        }
+
+        async function toggleBookmark() {
+            try {
+                const res = await fetch('/api/manhwa/bookmark.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({manga_id: mangaId})
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    const btn = document.getElementById('bookmark-btn');
+                    if(data.is_bookmarked) {
+                        btn.textContent = 'نشان شده ✓';
+                        btn.style.background = 'var(--accent-color)';
+                        btn.style.color = 'white';
+                        showAlert('به نشان‌شده‌ها اضافه شد.', 'success');
+                    } else {
+                        btn.textContent = 'نشان کردن';
+                        btn.style.background = 'transparent';
+                        btn.style.color = 'var(--accent-color)';
+                        showAlert('از نشان‌شده‌ها حذف شد.', 'success');
+                    }
+                } else {
+                    showAlert(data.error || 'خطا، لطفا ابتدا وارد حساب شوید.', 'error');
+                }
+            } catch(e){
+                showAlert('خطا در اتصال', 'error');
             }
         }
 
@@ -354,5 +399,6 @@
             }
         }
     </script>
+    <script src="/assets/js/layout.js"></script>
 </body>
 </html>
