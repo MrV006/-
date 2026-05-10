@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../../config.php';
-require_once __DIR__ . '/../../security.php';
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../security.php';
 requireAuth();
 
 $data = json_decode(file_get_contents('php://input'), true);

@@ -1,6 +1,6 @@
 <?php
-require_once '../config.php';
-require_once '../security.php';
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../security.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
