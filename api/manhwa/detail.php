@@ -8,7 +8,7 @@ if (!$mangaId) {
     echo json_encode(['error' => 'ID نامعتبر']); exit;
 }
 
-$stmt = $pdo->prepare("SELECT id, title, description, cover_image, genres, created_at FROM mangas WHERE id = ?");
+$stmt = $pdo->prepare("SELECT id, title, description, cover_image, genres, created_at, seo_title, seo_description, seo_keywords FROM mangas WHERE id = ?");
 $stmt->execute([$mangaId]);
 $manga = $stmt->fetch(PDO::FETCH_ASSOC);
 

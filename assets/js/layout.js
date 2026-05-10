@@ -51,6 +51,24 @@ async function loadLayout() {
             settings = data.settings;
             window.globalSettings = settings;
         }
+        
+        // Also load Site SEO logic
+        const sRes = await fetch('/api/admin/seo_get.php?type=site');
+        const sData = await sRes.json();
+        if (sRes.ok && sData.success && sData.seo) {
+            if (sData.seo.title) {
+                document.title = document.title === 'مانـگاتا' ? sData.seo.title : document.title + ' | ' + sData.seo.title;
+            }
+            if (sData.seo.description) {
+                let metaDesc = document.querySelector('meta[name="description"]');
+                if (!metaDesc) {
+                    metaDesc = document.createElement('meta');
+                    metaDesc.name = "description";
+                    document.head.appendChild(metaDesc);
+                }
+                metaDesc.content = sData.seo.description;
+            }
+        }
     } catch(e) {}
 
     // Footer HTML

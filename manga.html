@@ -239,6 +239,31 @@
                 
                 const tagsHtml = manga.genres.map(g => `<span class="tag">${g.trim()}</span>`).join('');
 
+                // Apply Manga SEO
+                if (manga.seo_title) {
+                    document.title = manga.seo_title;
+                } else {
+                    document.title = manga.title + ' | مانـگاتا';
+                }
+
+                if (manga.seo_description) {
+                    let metaDesc = document.querySelector('meta[name="description"]');
+                    if (!metaDesc) {
+                        metaDesc = document.createElement('meta');
+                        metaDesc.name = "description";
+                        document.head.appendChild(metaDesc);
+                    }
+                    metaDesc.content = manga.seo_description;
+                } else if (manga.description) {
+                    let metaDesc = document.querySelector('meta[name="description"]');
+                    if (!metaDesc) {
+                        metaDesc = document.createElement('meta');
+                        metaDesc.name = "description";
+                        document.head.appendChild(metaDesc);
+                    }
+                    metaDesc.content = manga.description.substring(0, 150);
+                }
+
                 const mangaHeader = document.getElementById('manga-header');
                 mangaHeader.innerHTML = `
                     <div class="manga-cover-large" style="${coverStyle}"></div>

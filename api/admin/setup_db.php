@@ -105,6 +105,25 @@ try {
     if ($check->rowCount() == 0) {
         $pdo->exec("ALTER TABLE mangas ADD COLUMN genres VARCHAR(255) NULL");
     }
+    
+    // Add SEO columns
+    $checkSeo = $pdo->query("SHOW COLUMNS FROM mangas LIKE 'seo_title'");
+    if ($checkSeo->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE mangas ADD COLUMN seo_title VARCHAR(255) NULL");
+        $pdo->exec("ALTER TABLE mangas ADD COLUMN seo_description TEXT NULL");
+        $pdo->exec("ALTER TABLE mangas ADD COLUMN seo_keywords TEXT NULL");
+        
+        $pdo->exec("ALTER TABLE settings ADD COLUMN seo_site_title VARCHAR(255) NULL");
+        $pdo->exec("ALTER TABLE settings ADD COLUMN seo_site_description TEXT NULL");
+        $pdo->exec("ALTER TABLE settings ADD COLUMN seo_site_keywords TEXT NULL");
+    }
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS genres_seo (
+        genre VARCHAR(255) PRIMARY KEY,
+        seo_title VARCHAR(255) NULL,
+        seo_description TEXT NULL,
+        seo_keywords TEXT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
     $check = $pdo->query("SHOW COLUMNS FROM staff_uploads LIKE 'status'");
     if ($check->rowCount() == 0) {

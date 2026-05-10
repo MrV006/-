@@ -52,7 +52,7 @@ function showSection(sectionId, evt) {
         evt.target.classList.add('active');
     }
 
-    const sections = ['dashboard', 'manga', 'receipts', 'comments', 'users', 'pricing', 'restore', 'analytics', 'tickets', 'staff_uploads', 'notifications'];
+    const sections = ['dashboard', 'manga', 'receipts', 'comments', 'users', 'pricing', 'restore', 'analytics', 'seo', 'tickets', 'staff_uploads', 'notifications'];
     sections.forEach(s => {
         const el = document.getElementById(`section-${s}`);
         if(el) el.style.display = 'none';
@@ -64,6 +64,7 @@ function showSection(sectionId, evt) {
     if (sectionId === 'receipts') fetchReceipts();
     if (sectionId === 'users' && currentUserRole === 'super_admin') fetchUsers();
     if (sectionId === 'analytics') loadAnalytics();
+    if (sectionId === 'seo') initSeoSection();
     if (sectionId === 'tickets') loadAdminTickets();
     if (sectionId === 'manga') fetchAdminMangasList();
     if (sectionId === 'staff_uploads') fetchStaffUploadsAdmin();
@@ -802,6 +803,143 @@ async function handleStaffUpload(uploadId, action) {
         }
     } catch (e) {
         showAlert('خطا در شبکه.', 'error');
+    }
+}
+
+// -------------------------------------------------------------
+// SEO Management
+// -------------------------------------------------------------
+async function initSeoSection() {
+    try {
+        const res = await fetch('/api/admin/seo_get.php?type=site', { credentials: 'include' });
+        const data = await res.json();
+        if (res.ok && data.success && data.seo) {
+            document.getElementById('seo_site_title').value = data.seo.title || '';
+            document.getElementById('seo_site_description').value = data.seo.description || '';
+            document.getElementById('seo_site_keywords').value = data.seo.keywords || '';
+        }
+
+        // populate manga select
+        const mRes = await fetch('/api/manhwa/list.php');
+        const mData = await mRes.json();
+        const mSelect = document.getElementById('seo_manga_select');
+        mSelect.innerHTML = '<option value="">برای انتخاب، مانهوا را برگزینید...</option>';
+        if (mRes.ok && mData.success && mData.data) {
+            mData.data.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.title;
+                mSelect.appendChild(opt);
+            });
+        }
+        
+        // populate genre select (hardcoded or from db, we will fetch from seo_get.php for existing genres + basic list)
+        const gRes = await fetch('/api/admin/seo_get.php?type=genres', { credentials: 'include' });
+        const gData = await gRes.json();
+        const gSelect = document.getElementById('seo_genre_select');
+        const defaultGenres = ['اکشن', 'فانتزی', 'درام', 'عاشقانه', 'ماجراجویی', 'کمدی', 'ایسکای', 'شبیه‌ساز', 'ترسناک'];
+        let allGenres = new Set(defaultGenres);
+        
+        if (gRes.ok && gData.success && gData.genres) {
+            gData.genres.forEach(g => allGenres.add(g.genre));
+        }
+        
+        gSelect.innerHTML = '<option value="">برای انتخاب، ژانر را برگزینید...</option>';
+        allGenres.forEach(g => {
+            const opt = document.createElement('option');
+            opt.value = g;
+            opt.textContent = g;
+            gSelect.appendChild(opt);
+        });
+
+    } catch (e) {}
+}
+
+async function saveSiteSeo(e) {
+    e.preventDefault();
+    const payload = {
+        type: 'site',
+        title: document.getElementById('seo_site_title').value,
+        description: document.getElementById('seo_site_description').value,
+        keywords: document.getElementById('seo_site_keywords').value
+    };
+    await submitSeo(payload);
+}
+
+async function loadMangaSeo() {
+    const id = document.getElementById('seo_manga_select').value;
+    const form = document.getElementById('seo-manga-form');
+    if (!id) { form.style.display = 'none'; return; }
+    
+    try {
+        const res = await fetch(`/api/admin/seo_get.php?type=manga&id=${id}`, { credentials: 'include' });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            document.getElementById('seo_manga_title').value = data.seo.title || '';
+            document.getElementById('seo_manga_description').value = data.seo.description || '';
+            document.getElementById('seo_manga_keywords').value = data.seo.keywords || '';
+            form.style.display = 'block';
+        }
+    } catch(e){}
+}
+
+async function saveMangaSeo(e) {
+    e.preventDefault();
+    const payload = {
+        type: 'manga',
+        id: document.getElementById('seo_manga_select').value,
+        title: document.getElementById('seo_manga_title').value,
+        description: document.getElementById('seo_manga_description').value,
+        keywords: document.getElementById('seo_manga_keywords').value
+    };
+    await submitSeo(payload);
+}
+
+async function loadGenreSeo() {
+    const genre = document.getElementById('seo_genre_select').value;
+    const form = document.getElementById('seo-genre-form');
+    if (!genre) { form.style.display = 'none'; return; }
+    
+    try {
+        const res = await fetch(`/api/admin/seo_get.php?type=genre&genre=${encodeURIComponent(genre)}`, { credentials: 'include' });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            document.getElementById('seo_genre_title').value = data.seo?.title || '';
+            document.getElementById('seo_genre_description').value = data.seo?.description || '';
+            document.getElementById('seo_genre_keywords').value = data.seo?.keywords || '';
+            form.style.display = 'block';
+        }
+    } catch(e){}
+}
+
+async function saveGenreSeo(e) {
+    e.preventDefault();
+    const payload = {
+        type: 'genre',
+        genre: document.getElementById('seo_genre_select').value,
+        title: document.getElementById('seo_genre_title').value,
+        description: document.getElementById('seo_genre_description').value,
+        keywords: document.getElementById('seo_genre_keywords').value
+    };
+    await submitSeo(payload);
+}
+
+async function submitSeo(payload) {
+    try {
+        const res = await fetch('/api/admin/seo_save.php', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            showAlert('تنظیمات سئو با موفقیت ذخیره شد.', 'success');
+        } else {
+            showAlert(data.error || 'خطا در ذخیره سئو', 'error');
+        }
+    } catch(e) {
+        showAlert('خطا در ارتباط با سرور', 'error');
     }
 }
 
