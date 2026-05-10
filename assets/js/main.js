@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Check for app updates (Simulated logic for now)
     checkAppVersion();
 
+    // Init Hero Slider
+    initHeroSlider();
+
     // 2. Fetch and render Mangas
     fetchMangas('latest-mangas', '/api/manhwa/list.php?type=latest');
     fetchMangas('recommended-mangas', '/api/manhwa/list.php?type=recommended');
@@ -18,6 +21,103 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Search functionality
     setupSearch();
 });
+
+// Variable for slider
+let currentSlide = 0;
+let totalSlides = 0;
+let slideInterval;
+
+async function initHeroSlider() {
+    const container = document.getElementById('hero-slider-container');
+    const indicatorsData = document.getElementById('slider-indicators');
+    if (!container) return;
+
+    try {
+        const response = await fetch('/api/manhwa/list.php?type=popular');
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data && result.data.length > 0) {
+                // limit slider to top 5
+                const slides = result.data.slice(0, 5);
+                totalSlides = slides.length;
+                container.innerHTML = '';
+                indicatorsData.innerHTML = '';
+
+                slides.forEach((manga, idx) => {
+                    const coverImage = manga.cover_image && manga.cover_image !== '/assets/images/default-cover.jpg' ? manga.cover_image : '';
+                    const hue = Math.floor(Math.random() * 360);
+                    const backgroundStyle = coverImage 
+                        ? `background-image: url('${coverImage}');`
+                        : `background: linear-gradient(45deg, hsl(${hue}, 40%, 20%), hsl(${hue + 40}, 50%, 30%));`;
+
+                    const slide = document.createElement('div');
+                    slide.className = 'hero-slide';
+                    slide.style.cssText = backgroundStyle;
+                    slide.innerHTML = `<div class="hero-content">
+                        <span class="hero-tag">انتخاب مدیریت</span>
+                        <h2>${manga.title}</h2>
+                        <p>${manga.description ? manga.description.substring(0, 150) + '...' : 'توضیحاتی برای این مانگا ثبت نشده است.'}</p>
+                        <div class="hero-actions">
+                            <a href="/manga.html?id=${manga.id}" class="btn-hero">شروع خواندن</a>
+                            <a href="/manga.html?id=${manga.id}" class="btn-outline-hero">جزئیات بیشتر</a>
+                        </div>
+                    </div>`;
+                    container.appendChild(slide);
+
+                    // Add indicator
+                    const ind = document.createElement('div');
+                    ind.className = `indicator ${idx === 0 ? 'active' : ''}`;
+                    ind.onclick = () => goToSlide(idx);
+                    indicatorsData.appendChild(ind);
+                });
+
+                startSlider();
+                return;
+            }
+        }
+    } catch (e) {
+        console.log(`Failed to load slider`);
+    }
+
+    container.innerHTML = `<div class="slider-placeholder">
+        <h2>مانگاتا</h2>
+        <p>هیچ اثری یافت نشد</p>
+    </div>`;
+}
+
+function updateSliderUI() {
+    const container = document.getElementById('hero-slider-container');
+    const indicators = document.querySelectorAll('.indicator');
+    if (!container || indicators.length === 0) return;
+    
+    container.style.transform = `translateX(${currentSlide * 100}%)`;
+    indicators.forEach((ind, idx) => {
+        ind.className = `indicator ${idx === currentSlide ? 'active' : ''}`;
+    });
+}
+
+window.moveSlide = function(dir) {
+    currentSlide += dir;
+    if (currentSlide >= totalSlides) currentSlide = 0;
+    if (currentSlide < 0) currentSlide = totalSlides - 1;
+    updateSliderUI();
+    resetSliderInterval();
+}
+
+window.goToSlide = function(idx) {
+    currentSlide = idx;
+    updateSliderUI();
+    resetSliderInterval();
+}
+
+function startSlider() {
+    slideInterval = setInterval(() => { window.moveSlide(1); }, 5000);
+}
+
+function resetSliderInterval() {
+    clearInterval(slideInterval);
+    startSlider();
+}
 
 // Generic Fetch List Function
 async function fetchList(containerId, endpoint, renderFn) {
@@ -127,32 +227,6 @@ async function fetchMangas(gridId, endpoint) {
         return;
     }
 
-    // Populate Hero Banner dynamically using first latest item if this is the latest manga grid
-    if (gridId === 'latest-mangas') {
-        const heroBanner = document.querySelector('.hero-banner');
-        if (data.length > 0) {
-            const heroItem = data[0];
-            const heroTag = document.querySelector('.hero-tag');
-            const heroTitle = document.querySelector('.hero-content h2');
-            const heroDesc = document.querySelector('.hero-content p');
-            const heroLink1 = document.querySelector('.btn-hero');
-            const heroLink2 = document.querySelector('.btn-outline-hero');
-
-            if (heroTag) heroTag.textContent = 'جدیدترین بروزرسانی';
-            if (heroTitle) heroTitle.textContent = heroItem.title;
-            if (heroDesc) heroDesc.textContent = heroItem.description ? heroItem.description.substring(0, 100) + '...' : 'توضیحاتی برای این مانگا ثبت نشده است.';
-            if (heroLink1) { heroLink1.href = `/manga.html?id=${heroItem.id}`; heroLink1.textContent = 'شروع خواندن'; }
-            if (heroLink2) { heroLink2.href = `/manga.html?id=${heroItem.id}`; heroLink2.textContent = 'جزئیات بیشتر'; }
-            if (heroBanner && heroItem.cover_image && heroItem.cover_image !== '/assets/images/default-cover.jpg') {
-                heroBanner.style.backgroundImage = `url('${heroItem.cover_image}')`;
-                heroBanner.style.backgroundSize = 'cover';
-                heroBanner.style.backgroundPosition = 'center';
-            }
-        } else {
-            if (heroBanner) heroBanner.style.display = 'none'; // hide hero banner if no data
-        }
-    }
-
     grid.innerHTML = ''; // clear any existing content
     
     data.forEach(manga => {
@@ -181,6 +255,7 @@ async function fetchMangas(gridId, endpoint) {
         grid.appendChild(card);
     });
 }
+
 
 // ================= MODALS & ALERTS =================
 

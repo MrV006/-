@@ -21,24 +21,32 @@
     <!-- هدر متحرک و واکنش‌گرا -->
     <!-- Header is injected by layout.js -->
 
-    <!-- بخش استرهای مانگاتا (بنر اختصاصی آپدیت) -->
-    <section class="stories-container">
-        <div class="stories-scroll" id="stories-list">
-            <!-- Data will be loaded from DB -->
+    <!-- اسلایدر اصلی سایت -->
+    <section class="hero-slider-section">
+        <div class="hero-slider-wrapper">
+            <div class="hero-slider-container" id="hero-slider-container">
+                <!-- Slides will be injected here via main.js -->
+                <div class="slider-placeholder">
+                    <h2>در حال بارگذاری...</h2>
+                    <p>لطفا کمی صبر کنید</p>
+                </div>
+            </div>
+            
+            <div class="slider-indicators" id="slider-indicators"></div>
+
+            <button class="slider-btn prev-btn" onclick="moveSlide(-1)" aria-label="Previous Slide">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button class="slider-btn next-btn" onclick="moveSlide(1)" aria-label="Next Slide">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
         </div>
     </section>
 
-    <!-- Hero Banner -->
-    <section class="hero-banner">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <span class="hero-tag">...</span>
-            <h2>در حال بارگذاری...</h2>
-            <p>لطفا کمی صبر کنید</p>
-            <div class="hero-actions">
-                <a href="#" class="btn btn-hero">...</a>
-                <a href="#" class="btn btn-outline-hero">...</a>
-            </div>
+    <!-- بخش استوری‌ها -->
+    <section class="stories-container">
+        <div class="stories-scroll" id="stories-list">
+            <!-- Data will be loaded from DB -->
         </div>
     </section>
 
