@@ -8,7 +8,6 @@ async function loadLayout() {
             <div class="header-right">
                 <a href="/" class="brand-logo" style="text-decoration:none;">مانـگاتا</a>
                 <nav class="desktop-nav">
-                    <a href="/shop.html">فروشگاه</a>
                     <a href="/">تازه‌ها</a>
                     <a href="/tickets.html">پشتیبانی</a>
                 </nav>
@@ -25,12 +24,23 @@ async function loadLayout() {
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </a>
                 
-                <button class="menu-btn mobile-only">
+                <button class="menu-btn mobile-only" id="mobile-menu-btn">
                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
             </div>
         </div>
     </header>
+    
+    <!-- Mobile Sidebar -->
+    <div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998;"></div>
+    <div class="mobile-sidebar" id="mobile-sidebar" style="position:fixed; top:0; right:-300px; width:280px; height:100%; background:var(--bg-surface); z-index:9999; transition:0.3s; box-shadow:-2px 0 10px rgba(0,0,0,0.5); display:flex; flex-direction:column; padding:2rem 1rem;">
+        <button id="close-sidebar-btn" style="background:none; border:none; color:var(--text-primary); font-size:2rem; cursor:pointer; align-self:flex-end; margin-bottom:1rem;">&times;</button>
+        <nav style="display:flex; flex-direction:column; gap:1rem; font-size:1.2rem;">
+            <a href="/" style="color:var(--text-primary); text-decoration:none; padding:0.5rem; border-radius:var(--radius-sm); border-bottom:1px solid var(--border-color);">🏠 صفحه اصلی</a>
+            <a href="/tickets.html" style="color:var(--text-primary); text-decoration:none; padding:0.5rem; border-radius:var(--radius-sm); border-bottom:1px solid var(--border-color);">💬 پشتیبانی</a>
+            <a href="/dashboard.html" style="color:var(--text-primary); text-decoration:none; padding:0.5rem; border-radius:var(--radius-sm); border-bottom:1px solid var(--border-color);" id="sidebar-dashboard-link">👤 داشبورد من</a>
+        </nav>
+    </div>
     `;
 
     let settings = null;
@@ -66,6 +76,29 @@ async function loadLayout() {
     if (!isReader) {
         if (!document.querySelector('.app-header')) {
             document.body.insertAdjacentHTML('afterbegin', headerHTML);
+            
+            // Sidebar Event Listeners
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const closeBtn = document.getElementById('close-sidebar-btn');
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('mobile-sidebar-overlay');
+            
+            if (menuBtn && sidebar && overlay && closeBtn) {
+                menuBtn.addEventListener('click', () => {
+                    sidebar.style.right = '0';
+                    overlay.style.display = 'block';
+                });
+                
+                closeBtn.addEventListener('click', () => {
+                    sidebar.style.right = '-300px';
+                    overlay.style.display = 'none';
+                });
+                
+                overlay.addEventListener('click', () => {
+                    sidebar.style.right = '-300px';
+                    overlay.style.display = 'none';
+                });
+            }
         }
         if (!document.querySelector('.app-footer')) {
             document.body.insertAdjacentHTML('beforeend', footerHTML);
@@ -82,6 +115,14 @@ async function loadLayout() {
                 if (profileBtn) {
                     if (data.user.role === 'admin' || data.user.role === 'superadmin') {
                         profileBtn.href = '/admin.html';
+                        const sidebarDashboardLink = document.getElementById('sidebar-dashboard-link');
+                        if (sidebarDashboardLink) {
+                            const adminLink = document.createElement('a');
+                            adminLink.href = '/admin.html';
+                            adminLink.style.cssText = 'color:var(--accent-color); text-decoration:none; padding:0.5rem; border-radius:var(--radius-sm); border-bottom:1px solid var(--border-color);';
+                            adminLink.innerHTML = '⚙️ پنل مدیریت';
+                            sidebarDashboardLink.parentNode.insertBefore(adminLink, sidebarDashboardLink.nextSibling);
+                        }
                     } else {
                         profileBtn.href = '/dashboard.html';
                     }

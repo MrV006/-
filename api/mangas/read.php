@@ -2,31 +2,32 @@
 require_once __DIR__ . '/../security.php';
 requireAuth(); // Anoymous cannot view chapters
 
-if (!isset($_GET['chapter_id']) || !isset($_GET['page'])) {
+if (!isset($_GET['chapter_id']) || !isset($_GET['file'])) {
     header('HTTP/1.1 400 Bad Request');
     exit;
 }
 
 $chapterId = intval($_GET['chapter_id']);
-$pageNum = intval($_GET['page']);
+$fileName = basename($_GET['file']); // VERY IMPORTANT: Basename to prevent LFI !
 
 // 1. Check if user is either Admin or Purchaser of the chapter
-if ($_SESSION['user_role'] !== 'admin') {
+if ($_SESSION['user_role'] !== 'admin' && $_SESSION['user_role'] !== 'super_admin') {
     $stmt = $pdo->prepare("SELECT COUNT(id) FROM purchases WHERE user_id = ? AND chapter_id = ?");
     $stmt->execute([$_SESSION['user_id'], $chapterId]);
     $hasAccess = $stmt->fetchColumn() > 0;
 
     if (!$hasAccess) {
-        header('HTTP/1.1 403 Forbidden');
-        exit;
+        $chStmt = $pdo->prepare("SELECT price FROM chapters WHERE id = ?");
+        $chStmt->execute([$chapterId]);
+        if ($chStmt->fetchColumn() > 0) {
+            header('HTTP/1.1 403 Forbidden');
+            exit;
+        }
     }
 }
 
 // 2. Fetch the target file path safely
-// Warning: In production, paths should be fetched securely from DB or rigidly structured mappings.
-// Using rigid mapping here to prevent Path Traversal Attacks (LFI)
-$safePageNum = preg_replace('/[^0-9]/', '', $pageNum); // Sanitize page number to numbers ONLY
-$filePath = __DIR__ . "/../../uploads/chapters/chap_{$chapterId}/page_{$safePageNum}.jpg";
+$filePath = __DIR__ . "/../../uploads/chapters/chap_{$chapterId}/{$fileName}";
 
 if (!file_exists($filePath)) {
     // Return standard Not Found or a placeholder image

@@ -52,7 +52,7 @@ function showSection(sectionId, evt) {
         evt.target.classList.add('active');
     }
 
-    const sections = ['dashboard', 'receipts', 'comments', 'users', 'pricing', 'restore', 'analytics', 'tickets', 'staff_uploads', 'notifications'];
+    const sections = ['dashboard', 'manga', 'receipts', 'comments', 'users', 'pricing', 'restore', 'analytics', 'tickets', 'staff_uploads', 'notifications'];
     sections.forEach(s => {
         const el = document.getElementById(`section-${s}`);
         if(el) el.style.display = 'none';
@@ -65,6 +65,8 @@ function showSection(sectionId, evt) {
     if (sectionId === 'users' && currentUserRole === 'super_admin') fetchUsers();
     if (sectionId === 'analytics') loadAnalytics();
     if (sectionId === 'tickets') loadAdminTickets();
+    if (sectionId === 'manga') fetchAdminMangasList();
+    if (sectionId === 'staff_uploads') fetchStaffUploadsAdmin();
 }
 
 // -------------------------------------------------------------
@@ -625,6 +627,181 @@ async function sendNotification(e) {
         }
     } catch (err) {
         showAlert('خطا در ارسال.', 'error');
+    }
+}
+
+// -------------------------------------------------------------
+// Manga Management (Upload/Create)
+// -------------------------------------------------------------
+async function fetchAdminMangasList() {
+    try {
+        const res = await fetch('/api/manhwa/list.php');
+        const data = await res.json();
+        
+        const select = document.getElementById('admin_manga_select');
+        select.innerHTML = '<option value="">برای انتخاب، مانهوا را برگزینید</option>';
+        if (res.ok && data.success && data.data) {
+            data.data.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.title;
+                select.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.error('Failed to load mangas');
+    }
+}
+
+async function createManga(e) {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('title', document.getElementById('new_manga_title').value);
+    formData.append('genres', document.getElementById('new_manga_genres').value);
+    formData.append('description', document.getElementById('new_manga_desc').value);
+    formData.append('cover', document.getElementById('new_manga_cover').files[0]);
+
+    try {
+        const res = await fetch('/api/admin/create_manga.php', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showAlert(data.message, 'success');
+            document.getElementById('create-manga-form').reset();
+            fetchAdminMangasList();
+        } else {
+            showAlert(data.error, 'error');
+        }
+    } catch (e) {
+        showAlert('خطا در سرور', 'error');
+    }
+}
+
+async function loadAdminMangaChapters() {
+    const mangaId = document.getElementById('admin_manga_select').value;
+    const container = document.getElementById('admin-manga-chapters');
+    
+    if (!mangaId) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    const listDiv = document.getElementById('admin-chapters-list');
+    listDiv.innerHTML = '<p>در حال بارگذاری چپترها...</p>';
+    
+    try {
+        const res = await fetch(`/api/manhwa/detail.php?id=${mangaId}`);
+        const data = await res.json();
+        if (res.ok && data.success && data.manga && data.manga.chapters) {
+            if (data.manga.chapters.length === 0) {
+                listDiv.innerHTML = '<p style="color:var(--text-muted);">چپتری یافت نشد.</p>';
+            } else {
+                listDiv.innerHTML = data.manga.chapters.map(c => `
+                    <div style="padding: 0.5rem; border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between;">
+                        <span>چپتر ${c.number}: ${c.title || ''}</span>
+                        <span style="color:var(--text-muted); font-size:0.8rem;">ID: ${c.id}</span>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch (e) {
+        listDiv.innerHTML = '<p style="color:var(--error-color);">خطا در بارگذاری چپترها</p>';
+    }
+}
+
+async function createChapter(e) {
+    e.preventDefault();
+    const mangaId = document.getElementById('admin_manga_select').value;
+    if (!mangaId) {
+        showAlert('لطفا یک مانهوا انتخاب کنید', 'error'); return;
+    }
+    
+    const payload = {
+        manga_id: mangaId,
+        chapter_number: document.getElementById('new_chapter_number').value,
+        title: document.getElementById('new_chapter_title').value,
+        price: document.getElementById('new_chapter_price').value
+    };
+    
+    try {
+        const res = await fetch('/api/admin/create_chapter.php', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showAlert(data.message, 'success');
+            document.getElementById('create-chapter-form').reset();
+            loadAdminMangaChapters();
+        } else {
+            showAlert(data.error, 'error');
+        }
+    } catch (e) {
+        showAlert('خطا در سرور', 'error');
+    }
+}
+
+// -------------------------------------------------------------
+// Staff Uploads Admin Review
+// -------------------------------------------------------------
+async function fetchStaffUploadsAdmin() {
+    const container = document.getElementById('admin-staff-uploads-container');
+    container.innerHTML = '<p style="color:var(--text-muted);">در حال بارگذاری...</p>';
+    
+    try {
+        const res = await fetch('/api/admin/staff_uploads_list.php', {credentials: 'include'});
+        const data = await res.json();
+        
+        if (res.ok && data.uploads) {
+            if (data.uploads.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted);">هیچ فایل جدیدی برای بررسی وجود ندارد.</p>';
+            } else {
+                container.innerHTML = data.uploads.map(u => `
+                    <div class="item-row" id="staff-upload-${u.id}">
+                        <div>
+                            <strong>فایل: ${u.original_name || 'نامشخص'} (چپتر ${u.chapter_id})</strong>
+                            <p style="font-size:0.875rem; color:var(--text-secondary); margin-top:0.25rem;">نقش: ${u.role === 'translator' ? 'مترجم' : (u.role === 'editor' ? 'تایپیست/ادیتور' : 'کلینر')} | ارسال توسط کاربر ID: ${u.user_id}</p>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">${u.created_at}</p>
+                        </div>
+                        <div class="item-actions">
+                            <a href="/${u.file_path}" target="_blank" class="btn" style="text-decoration:none; margin-right:0.5rem; display:inline-block; width:auto; background:var(--bg-surface); border:1px solid var(--border-color);">دانلود/مشاهده</a>
+                            <button class="btn-approve" onclick="handleStaffUpload(${u.id}, 'approve')">تایید</button>
+                            <button class="btn-reject" onclick="handleStaffUpload(${u.id}, 'reject')">رد</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch (e) {
+        container.innerHTML = '<p style="color:var(--error-color);">خطا در بارگذاری لیست.</p>';
+    }
+}
+
+async function handleStaffUpload(uploadId, action) {
+    if (!confirm(`آیا از ${action === 'approve' ? 'تایید' : 'رد'} این فایل اطمینان دارید؟`)) return;
+    
+    try {
+        const res = await fetch('/api/admin/staff_upload_action.php', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ upload_id: uploadId, action: action })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showAlert('عملیات با موفقیت انجام شد.', 'success');
+            document.getElementById(`staff-upload-${uploadId}`).remove();
+        } else {
+            showAlert(data.error, 'error');
+        }
+    } catch (e) {
+        showAlert('خطا در شبکه.', 'error');
     }
 }
 

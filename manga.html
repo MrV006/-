@@ -224,22 +224,30 @@
 
         async function loadMangaData() {
             try {
-                // Here we would normally hit an API like /api/manhwa/detail.php?id=X
-                // Since this is a UI prototype with some backend logic connected, we will mock the details
-                // but if there were real chapters we'd fetch them here.
+                const res = await fetch(`/api/manhwa/detail.php?id=${mangaId}`);
+                const data = await res.json();
                 
-                // MOCK DATA for Manga Headers
+                if(!res.ok || !data.success) {
+                    showAlert(data.error || 'خطا در بارگذاری اطلاعات مانهوا', 'error');
+                    return;
+                }
+                
+                const manga = data.manga;
+                const coverStyle = manga.cover_image && manga.cover_image !== '/assets/images/default-cover.jpg' 
+                    ? `background-image: url('${manga.cover_image}'); background-size: cover; background-position: center;`
+                    : `background: linear-gradient(45deg, #1e293b, #3b82f6);`;
+                
+                const tagsHtml = manga.genres.map(g => `<span class="tag">${g.trim()}</span>`).join('');
+
                 const mangaHeader = document.getElementById('manga-header');
                 mangaHeader.innerHTML = `
-                    <div class="manga-cover-large" style="background: linear-gradient(45deg, #1e293b, #3b82f6);"></div>
+                    <div class="manga-cover-large" style="${coverStyle}"></div>
                     <div class="manga-info-content">
-                        <h1>عنوان مانهوا (نمایشی)</h1>
+                        <h1>${manga.title}</h1>
                         <div class="manga-meta-tags">
-                            <span class="tag">اکشن</span>
-                            <span class="tag">فانتزی</span>
-                            <span class="tag">شبیه‌ساز</span>
+                            ${tagsHtml}
                         </div>
-                        <p class="manga-description">این یک متن نمایشی برای توضیحات مانهوا است. داستان از اینجا شروع می‌شود که قهرمان ما متوجه قدرت‌های پنهان خود می‌شود و سفری پرماجرا را آغاز می‌کند...</p>
+                        <p class="manga-description">${manga.description || 'بدون توضیحات'}</p>
                         <button class="btn btn-sm" id="bookmark-btn" onclick="toggleBookmark()" style="width:auto; margin-bottom:1rem; border:1px solid var(--accent-color); background:transparent; color:var(--accent-color);">نشان کردن</button>
                     </div>
                 `;
@@ -258,24 +266,25 @@
                     }
                 } catch(e){}
 
-                // MOCK DATA for Chapters List
                 const chaptersList = document.getElementById('chapters-list');
-                chaptersList.innerHTML = `
-                    <div class="chapter-item" onclick="readChapter(1, true)">
-                        <div>
-                            <strong>فصل 1</strong>
-                            <span style="display:block; font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">رایگان</span>
-                        </div>
-                        <span class="unlocked-badge">باز شده</span>
-                    </div>
-                    <div class="chapter-item" onclick="purchaseChapter(2)">
-                        <div>
-                            <strong>فصل 2</strong>
-                            <span style="display:block; font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">قیمت: ۵,۰۰۰ تومان</span>
-                        </div>
-                        <span class="price-badge">خرید</span>
-                    </div>
-                `;
+                if (manga.chapters && manga.chapters.length > 0) {
+                    chaptersList.innerHTML = manga.chapters.map(ch => {
+                        const isFree = !ch.price || parseFloat(ch.price) === 0;
+                        const priceBadge = isFree ? `<span class="unlocked-badge">رایگان</span>` : `<span class="price-badge">خرید (${ch.price} ت)</span>`;
+                        const clickAction = isFree ? `readChapter(${ch.number}, true, ${ch.id})` : `purchaseChapter(${ch.id}, ${ch.price}, ${ch.number})`;
+                        return `
+                            <div class="chapter-item" onclick="${clickAction}">
+                                <div>
+                                    <strong>چپتر ${ch.number} ${ch.title ? ': ' + ch.title : ''}</strong>
+                                    <span style="display:block; font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">${ch.created_at}</span>
+                                </div>
+                                ${priceBadge}
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    chaptersList.innerHTML = '<div style="padding:1rem;">هنوز چپتری منتشر نشده است.</div>';
+                }
             } catch (err) {
                 showAlert('خطا در بارگذاری اطلاعات.', 'error');
             }

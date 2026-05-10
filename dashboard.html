@@ -7,11 +7,14 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <style>
         .user-layout { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
+        .header-bar { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; margin-bottom: 2rem; background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
+        @media (min-width: 640px) {
+            .header-bar { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
         .wallet-badge { background: rgba(34, 197, 94, 0.1); color: var(--success-color); padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 600; font-size: 1.1rem; }
         
-        .tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
-        .tab-btn { background: none; border: none; color: var(--text-secondary); font-size: 1rem; cursor: pointer; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); transition: 0.2s; font-weight: 500; }
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        .tab-btn { flex-shrink: 0; background: none; border: none; color: var(--text-secondary); font-size: 0.95rem; cursor: pointer; padding: 0.75rem 1.25rem; border-radius: var(--radius-md); transition: 0.2s; font-weight: 500; }
         .tab-btn:hover { background: var(--bg-surface-hover); }
         .tab-btn.active { background: var(--accent-color); color: white; }
         
@@ -44,6 +47,7 @@
             <button class="tab-btn" onclick="switchTab('receipt')">شارژ کیف پول</button>
             <button class="tab-btn" onclick="switchTab('notifications')">نوتیفیکیشن‌ها</button>
             <button class="tab-btn" onclick="switchTab('earnings')" id="tab-btn-earnings" style="display:none;">درآمد من (همکار)</button>
+            <button class="tab-btn" onclick="switchTab('staff_upload')" id="tab-btn-staff-upload" style="display:none;">آپلود کارهای من (همکار)</button>
             <a href="/shop.html" class="tab-btn" style="text-decoration: none; display: flex; align-items: center;">رفتن به فروشگاه &rarr;</a>
         </div>
 
@@ -106,6 +110,46 @@
                 <div class="card" style="grid-column: 1/-1;">
                     <h3 style="margin-bottom: 1.5rem;">جزئیات کارهای انجام شده</h3>
                     <div id="earnings-history"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Upload Section -->
+        <div id="tab-staff_upload" style="display: none;">
+            <div class="grid-layout">
+                <div class="card" style="grid-column: 1/-1;">
+                    <h3 style="margin-bottom: 1.5rem;">آپلود فایل‌های ترجمه، ادیت و کلین</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        مترجمین محترم لطفاً فایل Word (doc/docx) ارسال کنند.
+                        <br>
+                        کلینرها و تایپیست‌ها لطفاً تصاویر را به صورت zip یا webp/jpg ارسال کنند. تایید نهایی فایل‌ها با مدیر است.
+                    </p>
+                    <form id="user-staff-upload-form">
+                        <div class="input-group">
+                            <label>شناسه (ID) چپتر (مربوط به کدام مانهوا و چپتر است؟)</label>
+                            <input type="number" id="staff_chapter_id" required placeholder="مثلاً: 12">
+                        </div>
+                        <div class="input-group">
+                            <label>نقش شما در این فایل</label>
+                            <select id="staff_role" required>
+                                <option value="translator">مترجم (فایل ورد)</option>
+                                <option value="editor">تایپیست/ادیتور (فایل zip یا تصویر)</option>
+                                <option value="cleaner">کلینر (فایل zip یا تصویر)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>فایل کار شما</label>
+                            <input type="file" id="staff_file" required style="padding: 0.5rem; background: var(--bg-primary);">
+                        </div>
+                        <button type="submit" class="btn" style="width: auto;">ارسال برای بررسی ادمین</button>
+                    </form>
+                </div>
+                
+                <div class="card" style="grid-column: 1/-1;">
+                    <h3 style="margin-bottom: 1.5rem;">تاریخچه ارسال‌های شما</h3>
+                    <div id="staff-uploads-history">
+                        <p style="color: var(--text-muted);">در حال بارگذاری...</p>
+                    </div>
                 </div>
             </div>
         </div>

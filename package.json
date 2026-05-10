@@ -2,6 +2,7 @@
   "name": "mangata",
   "version": "1.0.0",
   "scripts": {
-    "dev": "npx serve -l 3000"
+    "dev": "php -S 0.0.0.0:3000",
+    "build": "echo 'No build required for PHP'"
   }
 }

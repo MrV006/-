@@ -100,6 +100,18 @@ try {
         $pdo->exec("ALTER TABLE comments ADD COLUMN is_pinned BOOLEAN DEFAULT 0");
     }
 
+    // Check columns in mangas
+    $check = $pdo->query("SHOW COLUMNS FROM mangas LIKE 'genres'");
+    if ($check->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE mangas ADD COLUMN genres VARCHAR(255) NULL");
+    }
+
+    $check = $pdo->query("SHOW COLUMNS FROM staff_uploads LIKE 'status'");
+    if ($check->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE staff_uploads ADD COLUMN status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending'");
+        $pdo->exec("ALTER TABLE staff_uploads ADD COLUMN original_name VARCHAR(255) NULL");
+    }
+
     echo json_encode(['success' => true, 'message' => "Tables and columns created successfully."]);
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();

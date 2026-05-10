@@ -27,6 +27,15 @@ async function checkUserSession() {
             document.getElementById('user-name').textContent = data.user.username;
             document.getElementById('wallet-balance').textContent = Number(data.user.wallet_balance).toLocaleString('fa-IR');
             
+            if (data.user.role === 'admin' || data.user.role === 'superadmin') {
+                const adminBtn = document.createElement('a');
+                adminBtn.href = '/admin.html';
+                adminBtn.className = 'tab-btn';
+                adminBtn.style.cssText = 'text-decoration: none; display: flex; align-items: center; color: var(--accent-color); border: 1px solid var(--accent-color);';
+                adminBtn.innerHTML = 'پنل مدیریت &rarr;';
+                document.querySelector('.tabs').appendChild(adminBtn);
+            }
+
             // Show online payment if enabled
             checkPaymentOptions();
 
@@ -46,7 +55,8 @@ async function checkIfStaff() {
         const res = await fetch('/api/user/earnings.php', { credentials: 'include' });
         const data = await res.json();
         if (res.ok && data.is_staff) {
-            document.getElementById('tab-btn-earnings').style.display = 'block';
+            document.getElementById('tab-btn-earnings').style.display = 'inline-block';
+            document.getElementById('tab-btn-staff-upload').style.display = 'inline-block';
             window.staffData = data; // store for later
         }
     } catch (e) {}
@@ -68,19 +78,21 @@ function switchTab(tabId) {
     document.getElementById('tab-receipt').style.display = 'none';
     if(document.getElementById('tab-earnings')) document.getElementById('tab-earnings').style.display = 'none';
     if(document.getElementById('tab-notifications')) document.getElementById('tab-notifications').style.display = 'none';
+    if(document.getElementById('tab-staff_upload')) document.getElementById('tab-staff_upload').style.display = 'none';
     
     // Remove active state
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     
     // Add active state to clicked
     const e = window.event;
-    if(e && e.target) e.target.classList.add('active');
+    if(e && e.target && e.target.classList) e.target.classList.add('active');
     
     document.getElementById(`tab-${tabId}`).style.display = 'block';
 
     if (tabId === 'receipt') fetchReceiptHistory();
     if (tabId === 'library') fetchLibrary();
     if (tabId === 'earnings' && window.staffData) renderEarnings();
+    if (tabId === 'staff_upload') fetchStaffUploadHistory();
     if (tabId === 'notifications') {
         fetchNotifications();
         if(!notifyInterval) notifyInterval = setInterval(fetchNotifications_silent, 10000);
@@ -88,6 +100,90 @@ function switchTab(tabId) {
         if(notifyInterval) clearInterval(notifyInterval);
         notifyInterval = null;
     }
+}
+
+// -------------------------------------------------------------
+// Staff Upload (User View)
+// -------------------------------------------------------------
+async function fetchStaffUploadHistory() {
+    const container = document.getElementById('staff-uploads-history');
+    container.innerHTML = '<p style="color:var(--text-muted);">در حال بارگذاری...</p>';
+    try {
+        const res = await fetch('/api/user/my_staff_uploads.php', {credentials: 'include'});
+        const data = await res.json();
+        if (res.ok && data.uploads) {
+            if (data.uploads.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted);">تا کنون فایلی ارسال نکرده‌اید.</p>';
+            } else {
+                container.innerHTML = data.uploads.map(u => `
+                    <div style="border-bottom: 1px solid var(--border-color); padding: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong>فایل: ${u.original_name || 'نامشخص'} (چپتر ${u.chapter_id})</strong>
+                            <span class="status-badge ${u.status}">${statusMap[u.status] || u.status}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                            نقش: ${u.role === 'translator' ? 'مترجم' : (u.role === 'editor' ? 'ادیتور' : 'کلینر')} | ثبت شده در: ${u.created_at}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch (e) {
+        container.innerHTML = '<p style="color:var(--error-color);">خطا در بارگذاری تاریخچه</p>';
+    }
+}
+
+const staffUploadForm = document.getElementById('user-staff-upload-form');
+if (staffUploadForm) {
+    staffUploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector('button');
+        const OriginalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'در حال ارسال...';
+
+        const fileInput = document.getElementById('staff_file');
+        const role = document.getElementById('staff_role').value;
+        const file = fileInput.files[0];
+        
+        // Basic frontend validation
+        if (role === 'translator' && !file.name.toLowerCase().match(/\.(doc|docx)$/)) {
+            showAlert('مترجم عزیز، لطفاً فقط فایل ورد (doc/docx) ارسال کنید.', 'error');
+            submitBtn.disabled = false; submitBtn.textContent = OriginalText;
+            return;
+        }
+        if (role !== 'translator' && !file.name.toLowerCase().match(/\.(zip|webp|jpg|jpeg|png)$/)) {
+            showAlert('لطفاً فرمت مجاز (تصویر یا فایل zip) انتخاب کنید.', 'error');
+            submitBtn.disabled = false; submitBtn.textContent = OriginalText;
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('chapter_id', document.getElementById('staff_chapter_id').value);
+        formData.append('role', role);
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/user/staff_upload.php', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showAlert('فایل با موفقیت ارسال شد و در انتظار تایید است.', 'success');
+                e.target.reset();
+                fetchStaffUploadHistory();
+            } else {
+                showAlert(data.error, 'error');
+            }
+        } catch (err) {
+            showAlert('خطا در ارسال فایل. حجم فایل ممکن است زیاد باشد.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = OriginalText;
+        }
+    });
 }
 
 async function checkPaymentOptions() {

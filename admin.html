@@ -128,6 +128,7 @@
             <div id="role-badge"></div>
             <ul class="sidebar-menu">
                 <li><a href="#" class="active" onclick="showSection('dashboard')">داشبورد و تنظیمات</a></li>
+                <li><a href="#" onclick="showSection('manga')">مدیریت مانهوا (آپلود)</a></li>
                 <li><a href="#" onclick="showSection('analytics')">آمار و نمودارها</a></li>
                 <li><a href="#" onclick="showSection('tickets')">پشتیبانی و تیکت‌ها</a></li>
                 <li><a href="#" onclick="showSection('receipts')">بررسی فیش‌ها</a></li>
@@ -202,6 +203,68 @@
                 </div>
             </section>
 
+            <!-- Manga Management Section -->
+            <section id="section-manga" style="display: none;">
+                <div class="card-grid">
+                    <div class="card" style="grid-column: 1/-1;">
+                        <h2>ایجاد مانهوای جدید</h2>
+                        <form id="create-manga-form" onsubmit="createManga(event)">
+                            <div class="input-group">
+                                <label>نام مانهوا</label>
+                                <input type="text" id="new_manga_title" required>
+                            </div>
+                            <div class="input-group">
+                                <label>ژانرها (با کاما جدا کنید)</label>
+                                <input type="text" id="new_manga_genres" placeholder="اکشن, فانتزی, ...">
+                            </div>
+                            <div class="input-group">
+                                <label>توضیحات / خلاصه داستان</label>
+                                <textarea id="new_manga_desc" rows="4" required></textarea>
+                            </div>
+                            <div class="input-group">
+                                <label>تصویر کاور (پوستر)</label>
+                                <input type="file" id="new_manga_cover" accept=".jpg, .jpeg, .png, .webp" required>
+                            </div>
+                            <button type="submit" class="btn btn-approve">ایجاد مانهوا</button>
+                        </form>
+                    </div>
+
+                    <div class="card" style="grid-column: 1/-1;">
+                        <h2>لیست مانهواهای موجود / افزودن چپتر جدید</h2>
+                        <div class="input-group">
+                            <label>انتخاب مانهوا</label>
+                            <select id="admin_manga_select" onchange="loadAdminMangaChapters()">
+                                <option value="">برای انتخاب، مانهوا را برگزینید</option>
+                            </select>
+                        </div>
+                        <div id="admin-manga-chapters" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; display: none;">
+                            <h3 style="margin-bottom: 1rem;">افزودن چپتر جدید</h3>
+                            <form id="create-chapter-form" onsubmit="createChapter(event)">
+                                <div class="input-group">
+                                    <label>شماره چپتر</label>
+                                    <input type="number" id="new_chapter_number" required step="0.5">
+                                </div>
+                                <div class="input-group">
+                                    <label>عنوان چپتر (اختیاری)</label>
+                                    <input type="text" id="new_chapter_title">
+                                </div>
+                                <div class="input-group">
+                                    <label>قیمت اختصاصی چپتر (اختیاری، 0 = رایگان)</label>
+                                    <input type="number" id="new_chapter_price">
+                                </div>
+                                <div class="input-group">
+                                    <label>فایل تصاویر چپترها (ZIP مجاز است، یا آپلود تصاویر از طریق سرویس ذخیره‌سازی ابری، در اینجا فعلا اطلاعات چپتر در دیتابیس ثبت می‌شود تا در بخش آپلود تصاویر همکاران، تصاویر تکمیل شود)</label>
+                                </div>
+                                <button type="submit" class="btn btn-approve">ایجاد و ثبت چپتر</button>
+                            </form>
+                            <hr style="border-color: var(--border-color); margin: 2rem 0;">
+                            <h3 style="margin-bottom: 1rem;">چپترهای موجود این کار</h3>
+                            <div id="admin-chapters-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section id="section-analytics" style="display: none;">
                 <div class="card-grid">
                     <div class="card" style="grid-column: 1/-1;">
@@ -261,30 +324,14 @@
                 </div>
             </section>
 
-            <!-- Staff Uploads -->
+            <!-- Staff Uploads (Admin Review) -->
             <section id="section-staff_uploads" style="display: none;">
                 <div class="card">
-                    <h2>آپلود فایل‌های ترجمه، ادیت و کلین</h2>
-                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem;">فایل‌ها باید با فرمت .webp باشند.</p>
-                    <form id="staff-upload-form" onsubmit="uploadStaffFile(event)">
-                        <div class="input-group">
-                            <label>ID چپتر</label>
-                            <input type="number" id="staff_chapter_id" required>
-                        </div>
-                        <div class="input-group">
-                            <label>نقش شما در این فایل</label>
-                            <select id="staff_role" required>
-                                <option value="translator">مترجم</option>
-                                <option value="editor">ادیتور</option>
-                                <option value="cleaner">کلینر</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>فایل تصویری (.webp)</label>
-                            <input type="file" id="staff_file" accept=".webp" required>
-                        </div>
-                        <button type="submit" class="btn btn-approve">آپلود و ثبت</button>
-                    </form>
+                    <h2>فایل‌های ارسالی همکاران (در انتظار تایید)</h2>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem;">در اینجا می‌توانید کارهای مترجمین، کلینرها و تایپیست‌ها را بررسی و تایید کنید.</p>
+                    <div id="admin-staff-uploads-container">
+                        <p style="color:var(--text-muted);">در حال بارگذاری...</p>
+                    </div>
                 </div>
             </section>
 
